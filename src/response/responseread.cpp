@@ -92,3 +92,64 @@ QString ResponseRead::toString()
                      //QString("Принято %1 байт начиная с позиции %2").arg(_length).arg(_offset);
                      QString("%1 / %2 байт").arg(_offset + _length).arg(_fileInfo.length());
 }
+
+#include <QProcess>
+void ResponseRead::Handle(){
+    // создаем каталог куда нужно положить файлик если его нет
+    QDir d = QFileInfo(dstfilepath()).absoluteDir();
+    if(!d.exists())
+        d.mkpath(d.path());
+
+
+    // создаем файлик и перебрасываем туда все данные
+    QFile f (dstfilepath());
+    if(f.open(QIODevice::WriteOnly))
+    {
+        f.write(_data.constData(), length());
+        f.close();
+    }
+
+#ifdef Q_OS_LINUX
+    QString absPath = QFileInfo(f).absoluteFilePath();
+
+    QProcess proc;
+
+    proc.start("chgrp pa "+ d.absolutePath());
+    proc.waitForFinished();
+
+    proc.start("chown vladimir "+ d.absolutePath());
+    proc.waitForFinished();
+
+    proc.start("chgrp pa "+ absPath);
+    proc.waitForFinished();
+
+    proc.start("chown vladimir "+ absPath);
+    proc.waitForFinished();
+
+    if(_fileInfo._attrib.contains("E"))
+    {
+        proc.start("chmod g+x "+ absPath);
+        proc.waitForFinished();
+        proc.start("chmod u+x "+ absPath);
+        proc.waitForFinished();
+
+    }
+
+    if(_fileInfo._attrib.contains("W"))
+    {
+        proc.start("chmod g+w " + absPath);
+        proc.waitForFinished();
+        proc.start("chmod u+w "+ absPath);
+        proc.waitForFinished();
+
+    }
+
+    if(_fileInfo._attrib.contains("R"))
+    {
+        proc.start("chmod g+r " + absPath);
+        proc.waitForFinished();
+        proc.start("chmod u+r "+ absPath);
+        proc.waitForFinished();
+    }
+#endif
+}

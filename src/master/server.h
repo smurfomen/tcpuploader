@@ -23,6 +23,7 @@ private slots:
     void slotAcceptError      (ClientTcp *);
     void slotSvrNewConnection (ClientTcp *);
     void slotSvrDisconnected  (ClientTcp *);
+    void slotSvrDataready (ClientTcp *);
 
 private:
     const int delayTrashTempFiles = 60 * 5;                 // устаревание временных файлов, сек

@@ -9,9 +9,10 @@ DESTDIR = $$PWD/release
 }
 
 HEADERS += \
-    $$PWD/ini.h \
-    $$PWD/server.h
+    $$PWD/clientuploader.h \
+    $$PWD/ini.h
 
 SOURCES += \
+    $$PWD/clientuploader.cpp \
     $$PWD/ini.cpp \
-    $$PWD/server.cpp
+    $$PWD/main.cpp

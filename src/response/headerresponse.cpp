@@ -22,3 +22,22 @@ void HeaderResponse::Serialize  (QDataStream &stream)
     stream << reserv2;
     stream << reserv3;
 }
+
+void HeaderResponse::Deserialize(QDataStream &stream)
+{
+    quint32 header;                                         // заголовок
+    quint16 version;                                        // версия paServer
+    stream >> header;
+    stream >> version;
+
+    int rqt; stream >> rqt;
+    rq = (RemoteRqType)rqt;
+
+    stream >> _success;
+    stream >> src;
+    stream >> dst;
+    stream >> fullPath;
+    stream >> reserv1;
+    stream >> reserv2;
+    stream >> reserv3;
+}

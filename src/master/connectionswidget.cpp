@@ -16,15 +16,25 @@ ConnectionsWidget::~ConnectionsWidget()
 
 void ConnectionsWidget::clientStateChanged(QString ipclient, bool isConnected)
 {
-    auto items = ui->connections->findItems(ipclient, Qt::MatchContains);
-    if(isConnected && items.isEmpty())
+    QList<QListWidgetItem*> findClones;
+    for(int i = 0; i < ui->connections->count(); i++)
+    {
+        QListWidgetItem * item = ui->connections->item(i);
+        if(item->text() == ipclient)
+            findClones.append(item);
+    }
+
+    if(isConnected && findClones.isEmpty())
     {
         ui->connections->insertItem(0, ipclient);
     }
     else if (!isConnected)
     {
-        for(auto it : items)
-            ui->connections->removeItemWidget(it);
+        for(auto clone : findClones)
+        {
+            ui->connections->removeItemWidget(clone);
+            delete clone;
+        }
     }
 }
 

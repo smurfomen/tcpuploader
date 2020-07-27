@@ -3,6 +3,7 @@
 std::shared_ptr<Logger> logger = nullptr;              // текстовый логгер
 std::shared_ptr<Server> server = nullptr;
 QStringList selectedCients;
+QString destPath = "/home/pcuser";
 #include "common/inireadwrite.h"
 QString LOG_DIR = "log/paserver/paserver.log";
 namespace ini {
@@ -16,9 +17,12 @@ namespace ini {
             if(rdr.GetInt("PORT", tempPort))
                 port = static_cast<quint16>(tempPort);
 
-            QString tempLogdir;
-            if(rdr.GetText("LOGDIR",tempLogdir))
-                LOG_DIR = tempLogdir;
+            QString temp;
+            if(rdr.GetText("LOGDIR",temp))
+                LOG_DIR = temp;
+
+            if(rdr.GetText("DESTPATH", temp))
+                destPath = temp;
         }
 
         logger = std::shared_ptr<Logger>(new Logger(LOG_DIR, true, true));

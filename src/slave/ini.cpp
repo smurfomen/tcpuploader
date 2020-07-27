@@ -1,8 +1,6 @@
 #include "ini.h"
 
 std::shared_ptr<Logger> logger = nullptr;              // текстовый логгер
-std::shared_ptr<Server> server = nullptr;
-QStringList selectedCients;
 #include "common/inireadwrite.h"
 QString LOG_DIR = "log/paserver/paserver.log";
 namespace ini {
@@ -23,7 +21,6 @@ namespace ini {
 
         logger = std::shared_ptr<Logger>(new Logger(LOG_DIR, true, true));
         Logger::SetLoger(logger.get());
-        server = std::shared_ptr<Server>(new Server(ini::port, QHostAddress::Any, logger));
     }
 
     quint16 port = 28080;

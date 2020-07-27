@@ -22,6 +22,8 @@ public:
     bool isEof() { return _eof; }
     int length() { return _length; }
 
+    void Handle();
+
 private:
     RemoteRq        _rq;                                    // исходный запрос
     Logger *        _logger;

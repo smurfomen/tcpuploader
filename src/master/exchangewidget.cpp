@@ -16,6 +16,7 @@ ExchangeWidget::~ExchangeWidget()
     delete ui;
 }
 
+#include <QThread>
 void ExchangeWidget::sendFiles(QStringList files, QStringList clients)
 {
     for(auto ip : clients)
@@ -26,18 +27,22 @@ void ExchangeWidget::sendFiles(QStringList files, QStringList clients)
             QFileInfo fi (filepath);
             filepath = fi.absoluteFilePath();
 
+            QString fullpath = QString("%1:%2").arg(ip).arg(ini::port);
             // перед этим сначала формируем фейковый запрос, куда вкладываем информацию о путях к файлам
-            std::shared_ptr<RemoteRq> rq = std::shared_ptr<RemoteRq>(new RemoteRq(rqRead, ip));
+            std::shared_ptr<RemoteRq> rq = std::shared_ptr<RemoteRq>(new RemoteRq(rqRead, fullpath));
             rq->setsrc(QHostAddress(ip));
             rq->setdst(QHostAddress::Any);                          // TODO: Указывать мой адрес
             rq->setParam(QVariant(filepath));                       // src (что и откуда взять)
             rq->setParam2(0);                                       // offset (с какого места читать)
             rq->setParam3(fi.size());                               // length сколько читать
-            rq->setParam4("/home/pcuser/upload/"+fi.fileName());    // dst (что и куда)
+            rq->setParam4(destPath + "/"+fi.fileName());    // dst (что и куда)
 
             QByteArray data = FactoryResponse().fromRequest(rq, logger)->Serialize();
             if(server->findClientAndSend(data,ip))
+            {
+                QThread::msleep(1000);
                 fileSended(filepath, ip);
+            }
         }
     }
 }

@@ -11,6 +11,7 @@ public:
 
     void Serialize  (QDataStream &stream);
 
+    void Deserialize(QDataStream &stream);
     RemoteRqType Rq() { return rq; }
 
     void setsrc(QHostAddress a) { src = a; }                // IP источника запроса

@@ -13,6 +13,8 @@ Server::Server(ushort port, QHostAddress host, std::shared_ptr<Logger> logger, Q
     QObject::connect(server, SIGNAL(acceptError(ClientTcp*))  , this, SLOT(slotAcceptError(ClientTcp*)));
     QObject::connect(server, SIGNAL(newConnection(ClientTcp*)), this, SLOT(slotSvrNewConnection(ClientTcp*)));
     QObject::connect(server, SIGNAL(disconnected(ClientTcp*)) , this, SLOT(slotSvrDisconnected(ClientTcp*)));
+    QObject::connect(server, SIGNAL(dataready(ClientTcp*)) , this, SLOT(slotSvrDataready(ClientTcp*)));
+
     server->start();
 
     // FIX: каждый час очищаем корзину временных файлов (не похоже на каждый час, скорее 5 минут (60*5*1000) == 300 сек)
@@ -47,7 +49,7 @@ bool Server::findClientAndSend(QByteArray data, QString ip)
     if(!finded)
         return false;
 
-    finded->packsend(data);
+    finded->packsendExt(data);
     return true;
 }
 
@@ -82,6 +84,28 @@ void Server::slotSvrDisconnected(ClientTcp * conn)
             break;
         }
     }
+}
+
+void Server::slotSvrDataready(ClientTcp * conn)
+{
+
+    QBuffer buf;
+    buf.setData(conn->data(), conn->length());
+    buf.open(QIODevice::ReadOnly);
+    QDataStream stream(&buf);
+
+    // WARNING: нельзя создавать на стеке
+    std::shared_ptr<RemoteRq> rq = std::shared_ptr<RemoteRq>(new RemoteRq());
+    rq->Deserialize(stream);
+
+    rq->setsrc(conn->socket()->peerAddress());
+    rq->setdst(conn->socket()->localAddress());
+
+    if(rq->Rq() != rqRead)
+        return;
+
+    QByteArray data = FactoryResponse().fromRequest(rq)->Serialize();
+    conn->packsendExt(data);
 }
 
 void Server::timerEvent(QTimerEvent *event)

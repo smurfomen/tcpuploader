@@ -81,7 +81,7 @@ public:
             }
             case rqRead:
             {
-                response = new ResponseRead(*rq);
+                response = new ResponseRead(*rq, logger.get());
                 break;
             }
             default:
